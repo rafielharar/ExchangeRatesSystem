@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Common;
+using System;
 
-namespace ExchangeRatesWriter.Repository.mongo
+namespace Common
 {
-    public class MongoSettings
+    public interface IMongoSettings
     {
         public string ExchangeRatesCollectionName { get; set; }
         public string ConnectionString { get; set; }

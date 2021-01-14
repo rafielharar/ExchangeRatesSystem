@@ -7,6 +7,10 @@ using RabbitMQ.Client;
 using ExchangeRatesReader.Messaging;
 using ExchangeRatesReader.Service;
 using Common;
+using System.Linq;
+using System.Collections.Generic;
+using Microsoft.Extensions.Options;
+using ExchangeRatesReader.Setting;
 
 namespace ExchangeRatesReader
 {
@@ -23,9 +27,31 @@ namespace ExchangeRatesReader
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            //services.AddScoped<IExchangeRatesMapper, ExchangeRatesAPI.ExchangeRatesMapper>();
-            services.AddScoped<IExchangeRatesMapper, LiveRatesAPI.ExchangeRatesMapper>();
-            services.AddHostedService<ExchangeRatesReaderService>();
+
+            string apiType = Configuration["ApiType"];
+
+            switch (apiType)
+            {
+                case "LiveRatesApi":
+                    services.AddScoped<IExchangeRatesMapper, LiveRatesAPI.ExchangeRatesMapper>();
+                    break;
+                case "ExchangeRateApi":
+                    services.AddScoped<IExchangeRatesMapper, ExchangeRatesAPI.ExchangeRatesMapper>();
+                    break;
+            }
+
+            services.AddSingleton(sp =>
+            {
+                return new ApiSettings()
+                {
+                    PollingInterval = int.Parse(Configuration["ApiPollingInterval"]),
+                    Urls = Configuration.GetSection(apiType + "Urls")
+                       .GetChildren()
+                       .Select(x => x.Value)
+                       .ToArray()
+                };
+            });
+
 
             #region RabbitMQ Dependencies
 
@@ -47,6 +73,8 @@ namespace ExchangeRatesReader
             });
 
             #endregion
+
+            services.AddHostedService<ExchangeRatesReaderService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

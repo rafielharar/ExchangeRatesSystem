@@ -1,20 +1,15 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Common;
 using ExchangeRatesWriter.Messaging;
-using ExchangeRatesWriter.Repository.mongo;
+using ExchangeRatesWriter.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoRepository;
 using RabbitMQ.Client;
 
 namespace ExchangeRatesWriter
@@ -33,9 +28,28 @@ namespace ExchangeRatesWriter
         {
             services.AddControllers();
             services.AddAutoMapper(typeof(Startup));
-            services.Configure<MongoSettings>(Configuration.GetSection(nameof(MongoSettings)));
-            services.AddSingleton(sp => sp.GetRequiredService<IOptions<MongoSettings>>().Value);
-            services.AddScoped<IExchangeRatesRepository, ExchangeRatesRepository>();
+
+            #region MongoDb Dependencies
+
+            //services.Configure<IMongoSettings>(Configuration.GetSection(nameof(MongoSettings)));
+            //services.AddSingleton(sp => sp.GetRequiredService<IOptions<MongoSettings>>().Value);
+
+            services.AddSingleton<IMongoSettings>(sp =>
+            {
+                return new MongoSettings()
+                {
+                    ExchangeRatesCollectionName = Configuration["MongoSettings:ExchangeRatesCollectionName"],
+                    ConnectionString = Configuration["MongoSettings:ConnectionString"],
+                    DatabaseName = Configuration["MongoSettings:DatabaseName"]
+                };
+            });
+
+            services.AddScoped<IExchangeRatesRepository, ExchangeRatesMongoRepository>();
+            
+            #endregion
+
+            services.Configure<Dictionary<string, string[]>>(Configuration.GetSection("CurrencyPairs"));
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<Dictionary<string, string[]>>>().Value);
 
             #region RabbitMQ Dependencies
 

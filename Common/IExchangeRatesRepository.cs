@@ -7,6 +7,6 @@ namespace Common
     public interface IExchangeRatesRepository
     {
         void Save(List<ExchangeRatesPair> exchanges);
-        IEnumerable<ExchangeRatesPair> GetLatest();
+        IEnumerable<ExchangeRatesPair> GetLatest(Dictionary<string, string[]> currencyPairs);
     }
 }

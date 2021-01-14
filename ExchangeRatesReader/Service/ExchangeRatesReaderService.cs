@@ -11,28 +11,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using ExchangeRatesReader.Messaging;
 using Newtonsoft.Json;
+using ExchangeRatesReader.Setting;
 
 namespace ExchangeRatesReader.Service
 {
     public class ExchangeRatesReaderService : BackgroundService
     {
         private readonly IServiceScopeFactory m_ServiceScopeFactory;
-        private readonly IConfiguration m_AppConfig;
+        private readonly ApiSettings m_ApiSettings;
         private readonly IEventBusProducer m_EventBusProducer;
 
         public ExchangeRatesReaderService(
             IServiceScopeFactory serviceScopeFactory, IConfiguration appConfig,
-            IEventBusProducer eventBusProducer)
+            IEventBusProducer eventBusProducer, ApiSettings apiSettings)
         {
             m_ServiceScopeFactory = serviceScopeFactory ?? throw new ArgumentException(nameof(serviceScopeFactory));
             m_EventBusProducer = eventBusProducer ?? throw new ArgumentException(nameof(eventBusProducer));
-            m_AppConfig = appConfig ?? throw new ArgumentException(nameof(appConfig));
+            m_ApiSettings = apiSettings ?? throw new ArgumentException(nameof(apiSettings));
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            int interval = int.Parse(m_AppConfig["ExchangeRateApiPollingInterval"]); 
-            System.Timers.Timer timer = new System.Timers.Timer(interval);
+            System.Timers.Timer timer = new System.Timers.Timer(m_ApiSettings.PollingInterval);
 
             timer.Elapsed += (arg1, arg2) =>
             {
@@ -50,7 +50,7 @@ namespace ExchangeRatesReader.Service
             List<ExchangeRatesPair> exchangePairs = new List<ExchangeRatesPair>();
             IExchangeRatesMapper exchangeRatesMapper = getExchangeRatesMapperService();
 
-            foreach (string apiUrl in getApiUrls())
+            foreach (string apiUrl in m_ApiSettings.Urls)
             {
                 string exchangeRates = readDataAsync(apiUrl).Result;
                 
@@ -63,15 +63,6 @@ namespace ExchangeRatesReader.Service
             return exchangePairs;
 
             /* helpers */
-
-            string[] getApiUrls()
-            {
-                return m_AppConfig
-                       .GetSection("ExchangeRateApi")
-                       .GetChildren()
-                       .Select(x => x.Value)
-                       .ToArray();
-            }
 
             IExchangeRatesMapper getExchangeRatesMapperService()
             {

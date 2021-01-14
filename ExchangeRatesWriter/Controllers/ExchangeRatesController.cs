@@ -13,17 +13,20 @@ namespace ExchangeRatesWriter.Controllers
     [ApiController]
     public class ExchangeRatesController : ControllerBase
     {
-        public IExchangeRatesRepository m_ExchangeRatesRepository { get; set; }
+        private readonly Dictionary<string, string[]> m_CurrencyPairs;
+        private IExchangeRatesRepository m_ExchangeRatesRepository;
 
-        public ExchangeRatesController(IExchangeRatesRepository exchangeRepos)
+        public ExchangeRatesController(IExchangeRatesRepository exchangeRepos, 
+            Dictionary<string, string[]> currencyPairs)
         {
             m_ExchangeRatesRepository = exchangeRepos ?? throw new ArgumentException(nameof(exchangeRepos));
+            m_CurrencyPairs = currencyPairs;
         }
         // GET: api/<ValuesController>
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(m_ExchangeRatesRepository.GetLatest());
+            return Ok(m_ExchangeRatesRepository.GetLatest(m_CurrencyPairs));
         }
     }
 }

@@ -11,12 +11,12 @@
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
-    <PackageReference Include="MongoDB.Driver" Version="2.11.5" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\MongoRepository\MongoRepository.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
