@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  exchangeratesreader:
+    image: ${DOCKER_REGISTRY-}exchangeratesreader
+    build:
+      context: .
+      dockerfile: ExchangeRatesReader/Dockerfile
+
+  rabbitmq:
+    image: rabbitmq:3-management
+
+  ExchangeRatesDb:
+    image: mongo
+
+  exchangerateswriter:
+
+    image: ${DOCKER_REGISTRY-}exchangerateswriter
+    build:
+      context: .
+      dockerfile: ExchangeRatesWriter/Dockerfile
+

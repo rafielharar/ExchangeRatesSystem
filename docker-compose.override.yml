@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  exchangeratesreader:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
+
+  rabbitmq:
+        container_name: rabbitMq
+        restart: always
+        ports:
+            - "5674:5672"
+            - "25671:15672"
+
+  ExchangeRatesDb:  
+        container_name: ExchangeRatesDb
+        ports:
+            - "27016:27017"
+            
+  exchangerateswriter:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "25670:80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
