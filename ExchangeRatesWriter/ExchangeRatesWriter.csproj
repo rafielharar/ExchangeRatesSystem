@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MongoRepository\MongoRepository.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Repository\MongoRepository\MongoRepository.csproj" />
   </ItemGroup>
 
 
